@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OIL KING | إدارة المحل</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+:root{
+  --bg:#090d0b;--panel:#111a15;--panel2:#17231b;
+  --green:#1c9b5a;--gold:#d8b65c;--text:#f4f5f1;
+  --muted:#9aa99e;--border:#29382e;--red:#e45d5d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:250px;background:#0e1511;border-left:1px solid var(--border);
+padding:25px 16px;position:fixed;right:0;top:0;bottom:0;z-index:5}
+.brand{text-align:center;padding:10px 0 30px}
+.brand h1{font-size:27px;letter-spacing:3px;color:var(--gold);margin:0}
+.brand small{color:var(--muted);letter-spacing:2px}
+.nav-title{font-size:11px;color:#718078;margin:18px 12px 8px}
+.nav-btn{width:100%;display:flex;align-items:center;gap:12px;
+background:none;color:#aab8ad;border:0;padding:12px 14px;
+border-radius:10px;text-align:right;margin:4px 0;transition:.2s}
+.nav-btn:hover,.nav-btn.active{background:#1b3023;color:#fff}
+.nav-btn.active{border-right:3px solid var(--gold)}
+.main{margin-right:250px;width:calc(100% - 250px);padding:30px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;gap:15px}
+.topbar h2{margin:0;font-size:25px}
+.topbar p{margin:3px 0;color:var(--muted);font-size:13px}
+.pill{border:1px solid var(--border);padding:8px 13px;border-radius:30px;color:var(--gold);font-size:12px}
+.page{display:none}.page.active{display:block}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:22px}
+.stat,.panel{background:var(--panel);border:1px solid var(--border);border-radius:15px;padding:20px}
+.stat .label{color:var(--muted);font-size:13px}
+.stat .value{font-size:25px;font-weight:800;margin-top:10px}
+.stat .sub{color:var(--green);font-size:11px;margin-top:4px}
+.gold{color:var(--gold)}.green{color:#55c889}.red{color:var(--red)}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:25px 0 15px;flex-wrap:wrap}
+.section-head h3{margin:0;font-size:17px}
+.panel{margin-bottom:18px}
+.btn{border:0;border-radius:9px;padding:10px 16px;font-weight:700}
+.btn-primary{background:var(--green);color:white}
+.btn-primary:hover{background:#16834b}
+.btn-gold{background:var(--gold);color:#16140c}
+.btn-danger{background:#482323;color:#ffaaaa}
+.btn-secondary{background:#25352a;color:#dce9df}
+table{width:100%;border-collapse:collapse;min-width:600px}
+th,td{padding:13px 12px;text-align:right;border-bottom:1px solid var(--border);font-size:13px}
+th{color:var(--muted);font-weight:600}
+td{color:#e1e9e2}
+.table-wrap{overflow-x:auto}
+.tag{padding:4px 9px;border-radius:20px;font-size:11px;background:#1c3c29;color:#75d69b}
+.tag.low{background:#432b1e;color:#ffc27d}
+.tag.out{background:#462323;color:#ff9c9c}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.actions button{padding:5px 9px;font-size:11px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12px;color:var(--muted)}
+.field input,.field select{width:100%;background:#0b120e;border:1px solid var(--border);
+border-radius:8px;padding:11px;color:white;outline:none}
+.field input:focus,.field select:focus{border-color:var(--green)}
+.form-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.empty{text-align:center;color:var(--muted);padding:30px}
+.alert{background:#352b19;border:1px solid #70562c;color:#f2d18a;padding:13px;border-radius:10px;margin-bottom:15px;font-size:13px}
+.chart-bars{display:flex;align-items:end;gap:12px;height:180px;padding:15px 0}
+.bar-item{flex:1;text-align:center;font-size:11px;color:var(--muted)}
+.bar{background:linear-gradient(0deg,#176c3e,#48bd7a);border-radius:6px 6px 0 0;min-height:4px;margin-bottom:8px}
+.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
+.modal.open{display:flex}
+.modal-box{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:23px;width:100%;max-width:520px;max-height:90vh;overflow:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-head h3{margin:0;color:var(--gold)}
+.close{background:none;color:white;border:0;font-size:24px}
+.mobile-menu{display:none}
+@media(max-width:1000px){
+.stats{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:700px){
+.sidebar{transform:translateX(100%);transition:.25s}
+.sidebar.open{transform:translateX(0)}
+.main{margin:0;width:100%;padding:18px}
+.mobile-menu{display:block;background:var(--panel2);color:white;border:1px solid var(--border);padding:8px 12px;border-radius:8px}
+.topbar h2{font-size:19px}
+.form-grid{grid-template-columns:1fr}
+.stats{gap:9px}
+.stat{padding:14px}
+.stat .value{font-size:19px}
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <h1>OIL KING</h1>
+    <small>MANAGEMENT SYSTEM</small>
+  </div>
+  <div class="nav-title">القائمة الرئيسية</div>
+  <button class="nav-btn active" data-page="dashboard">◈ لوحة التحكم</button>
+  <button class="nav-btn" data-page="sales">▤ المبيعات</button>
+  <button class="nav-btn" data-page="returns">↩ المرتجعات</button>
+  <button class="nav-btn" data-page="products">▦ المنتجات</button>
+  <button class="nav-btn" data-page="inventory">▧ المخزون</button>
+  <div class="nav-title">الإدارة والتحليل</div>
+  <button class="nav-btn" data-page="reports">▥ التقارير والإحصائيات</button>
+  <button class="nav-btn" data-page="settings">⚙ الإعدادات</button>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+    <div>
+      <h2 id="pageTitle">لوحة التحكم</h2>
+      <p id="today"></p>
+    </div>
+  </div>
+  <span class="pill">● قاعدة البيانات: Supabase</span>
+</header>
+
+<section class="page active" id="dashboard">
+  <div class="stats">
+    <div class="stat"><div class="label">مبيعات اليوم</div><div class="value gold" id="todaySales">0 ج.م</div><div class="sub">بعد خصم المرتجعات</div></div>
+    <div class="stat"><div class="label">أرباح اليوم</div><div class="value green" id="todayProfit">0 ج.م</div><div class="sub">صافي بعد المرتجعات</div></div>
+    <div class="stat"><div class="label">عدد الفواتير</div><div class="value" id="todayInvoices">0</div><div class="sub" id="todayReturns">مرتجعات اليوم: 0</div></div>
+    <div class="stat"><div class="label">عدد المنتجات</div><div class="value" id="productCount">0</div><div class="sub">منتجات مسجلة</div></div>
+  </div>
+  <div id="dashboardAlerts"></div>
+  <div class="section-head"><h3>آخر المبيعات</h3>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="openSale()">+ تسجيل بيع</button>
+      <button class="btn btn-secondary" onclick="openReturn()">↩ تسجيل مرتجع</button>
+    </div>
+  </div>
+  <div class="panel table-wrap"><table><thead><tr><th>رقم الفاتورة</th><th>المنتج</th><th>الكمية</th><th>الإجمالي</th><th>الربح</th><th>التاريخ</th></tr></thead><tbody id="recentSales"></tbody></table></div>
+  <div class="section-head"><h3>أكثر المنتجات مبيعًا (صافي)</h3></div>
+  <div class="panel table-wrap"><table><thead><tr><th>المنتج</th><th>الكمية المباعة</th><th>إجمالي المبيعات</th></tr></thead><tbody id="topProducts"></tbody></table></div>
+</section>
+
+<section class="page" id="products">
+  <div class="section-head"><h3>إدارة المنتجات</h3><button class="btn btn-primary" onclick="openProduct()">+ إضافة منتج</button></div>
+  <div class="panel">
+    <div class="field" style="max-width:350px;margin-bottom:15px">
+      <label>بحث عن منتج</label><input id="productSearch" placeholder="اكتب اسم المنتج..." oninput="renderProducts()">
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>اسم المنتج</th><th>التصنيف</th><th>سعر الشراء</th><th>سعر البيع</th><th>الكمية</th><th>الربح للوحدة</th><th>الإجراءات</th></tr></thead><tbody id="productsTable"></tbody></table></div>
+  </div>
+</section>
+
+<section class="page" id="sales">
+  <div class="section-head"><h3>سجل المبيعات</h3><button class="btn btn-primary" onclick="openSale()">+ تسجيل عملية بيع</button></div>
+  <div class="stats">
+    <div class="stat"><div class="label">إجمالي المبيعات</div><div class="value gold" id="allSales">0</div></div>
+    <div class="stat"><div class="label">إجمالي الأرباح (قبل المرتجعات)</div><div class="value green" id="allProfit">0</div></div>
+  </div>
+  <div class="panel table-wrap"><table><thead><tr><th>الفاتورة</th><th>المنتج</th><th>الكمية</th><th>المرتجع</th><th>سعر الوحدة</th><th>الإجمالي</th><th>الربح</th><th>التاريخ</th></tr></thead><tbody id="salesTable"></tbody></table></div>
+</section>
+
+<section class="page" id="returns">
+  <div class="section-head"><h3>سجل المرتجعات</h3><button class="btn btn-primary" onclick="openReturn()">+ تسجيل مرتجع</button></div>
+  <div class="stats">
+    <div class="stat"><div class="label">عدد المرتجعات</div><div class="value" id="retCount">0</div></div>
+    <div class="stat"><div class="label">إجمالي المبالغ المستردة</div><div class="value red" id="retTotal">0</div></div>
+    <div class="stat"><div class="label">الوحدات المرتجعة</div><div class="value" id="retUnits">0</div></div>
+  </div>
+  <div class="panel table-wrap"><table><thead><tr><th>رقم المرتجع</th><th>الفاتورة الأصلية</th><th>المنتج</th><th>الكمية</th><th>المبلغ المسترد</th><th>الربح المخصوم</th><th>السبب</th><th>التاريخ</th></tr></thead><tbody id="returnsTable"></tbody></table></div>
+</section>
+
+<section class="page" id="inventory">
+  <div class="section-head"><h3>إدارة المخزون</h3></div>
+  <div class="stats">
+    <div class="stat"><div class="label">إجمالي الوحدات</div><div class="value" id="stockUnits">0</div></div>
+    <div class="stat"><div class="label">قيمة المخزون بالتكلفة</div><div class="value gold" id="stockValue">0</div></div>
+    <div class="stat"><div class="label">منتجات منخفضة</div><div class="value red" id="lowCount">0</div></div>
+    <div class="stat"><div class="label">منتجات نافدة</div><div class="value red" id="outCount">0</div></div>
+  </div>
+  <div class="panel table-wrap"><table><thead><tr><th>المنتج</th><th>الكمية المتاحة</th><th>حد التنبيه</th><th>الحالة</th><th>قيمة المخزون</th></tr></thead><tbody id="inventoryTable"></tbody></table></div>
+</section>
+
+<section class="page" id="reports">
+  <div class="section-head"><h3>التقارير والإحصائيات</h3></div>
+  <div class="stats">
+    <div class="stat"><div class="label">صافي الإيرادات</div><div class="value gold" id="reportSales">0</div><div class="sub">بعد خصم المرتجعات</div></div>
+    <div class="stat"><div class="label">إجمالي المرتجعات</div><div class="value red" id="reportReturns">0</div></div>
+    <div class="stat"><div class="label">صافي تكلفة البضاعة المباعة</div><div class="value" id="reportCost">0</div></div>
+    <div class="stat"><div class="label">صافي الربح</div><div class="value green" id="reportProfit">0</div></div>
+  </div>
+  <div class="panel">
+    <h3 style="margin-top:0">صافي المبيعات خلال آخر 7 أيام</h3>
+    <div class="chart-bars" id="salesChart"></div>
+  </div>
+  <div class="panel">
+    <h3 style="margin-top:0">ملخص الأداء</h3>
+    <p>عدد عمليات البيع: <strong id="salesCount">0</strong></p>
+    <p>عدد المرتجعات: <strong class="red" id="returnsCount">0</strong></p>
+    <p>متوسط قيمة الفاتورة: <strong class="gold" id="avgInvoice">0 ج.م</strong></p>
+    <p>متوسط الربح الصافي لكل عملية بيع: <strong class="green" id="avgProfit">0 ج.م</strong></p>
+  </div>
+</section>
+
+<section class="page" id="settings">
+  <div class="section-head"><h3>إعدادات النظام</h3></div>
+  <div class="panel">
+    <h3 class="gold">بيانات المحل</h3>
+    <div class="form-grid">
+      <div class="field"><label>اسم المحل</label><input id="shopName" value="OIL KING"></div>
+      <div class="field"><label>حد تنبيه المخزون الافتراضي</label><input id="defaultLimit" type="number" min="0" value="5"></div>
+    </div>
+    <div class="form-actions"><button class="btn btn-primary" onclick="saveSettings()">حفظ الإعدادات</button></div>
+  </div>
+  <div class="panel">
+    <h3 class="gold">النسخ الاحتياطي</h3>
+    <p style="color:var(--muted);font-size:13px">تصدير نسخة JSON من البيانات المعروضة (المنتجات والمبيعات والمرتجعات). النسخ الأساسية محفوظة تلقائيًا في Supabase.</p>
+    <div class="form-actions"><button class="btn btn-gold" onclick="exportData()">تصدير نسخة احتياطية</button></div>
+  </div>
+  <div class="panel">
+    <h3 class="gold">قاعدة البيانات - Supabase</h3>
+    <p style="color:var(--muted);font-size:13px">حالة الاتصال: <span class="tag" id="dbStatus">غير متصل</span></p>
+    <div class="form-actions"><button class="btn btn-danger" onclick="logout()">تسجيل الخروج</button></div>
+  </div>
+</section>
+</main>
+</div>
+
+<!-- Login Modal -->
+<div class="modal" id="loginModal">
+<div class="modal-box">
+  <div class="modal-head"><h3>تسجيل الدخول</h3></div>
+  <div class="field"><label>البريد الإلكتروني</label><input id="loginEmail" type="email"></div>
+  <div class="field" style="margin-top:12px"><label>كلمة المرور</label><input id="loginPass" type="password" onkeydown="if(event.key==='Enter')login()"></div>
+  <div class="form-actions"><button class="btn btn-primary" onclick="login()">دخول</button></div>
+</div>
+</div>
+
+<!-- Product Modal -->
+<div class="modal" id="productModal">
+<div class="modal-box">
+  <div class="modal-head"><h3 id="productModalTitle">إضافة منتج</h3><button class="close" onclick="closeModal('productModal')">×</button></div>
+  <input type="hidden" id="editProductId">
+  <div class="form-grid">
+    <div class="field"><label>اسم المنتج</label><input id="pName" placeholder="مثال: زيت 5W30"></div>
+    <div class="field"><label>التصنيف</label><select id="pCategory"><option>زيوت محركات</option><option>زيوت فتيس</option><option>فلاتر</option><option>إضافات</option><option>منتجات أخرى</option></select></div>
+    <div class="field"><label>سعر الشراء</label><input id="pCost" type="number" min="0" step=".01"></div>
+    <div class="field"><label>سعر البيع</label><input id="pPrice" type="number" min="0" step=".01"></div>
+    <div class="field"><label>الكمية بالمخزون</label><input id="pStock" type="number" min="0"></div>
+    <div class="field"><label>حد التنبيه</label><input id="pLimit" type="number" min="0" value="5"></div>
+  </div>
+  <div class="form-actions"><button class="btn btn-primary" onclick="saveProduct()">حفظ المنتج</button><button class="btn btn-secondary" onclick="closeModal('productModal')">إلغاء</button></div>
+</div>
+</div>
+
+<!-- Sale Modal -->
+<div class="modal" id="saleModal">
+<div class="modal-box">
+  <div class="modal-head"><h3>تسجيل عملية بيع</h3><button class="close" onclick="closeModal('saleModal')">×</button></div>
+  <div class="form-grid">
+    <div class="field" style="grid-column:1/-1"><label>المنتج</label><select id="saleProduct" onchange="updateSalePreview()"></select></div>
+    <div class="field"><label>الكمية</label><input id="saleQty" type="number" min="1" value="1" oninput="updateSalePreview()"></div>
+    <div class="field"><label>سعر البيع للوحدة</label><input id="salePrice" type="number" min="0" step=".01" oninput="updateSalePreview()"></div>
+  </div>
+  <div class="panel" style="margin-top:15px;margin-bottom:0">
+    <p>الإجمالي: <strong class="gold" id="saleTotal">0 ج.م</strong></p>
+    <p>الربح المتوقع: <strong class="green" id="saleProfit">0 ج.م</strong></p>
+    <p id="saleStock" style="color:var(--muted);font-size:12px"></p>
+  </div>
+  <div class="form-actions"><button class="btn btn-primary" onclick="saveSale()">تأكيد البيع</button><button class="btn btn-secondary" onclick="closeModal('saleModal')">إلغاء</button></div>
+</div>
+</div>
+
+<!-- Return Modal -->
+<div class="modal" id="returnModal">
+<div class="modal-box">
+  <div class="modal-head"><h3>تسجيل مرتجع</h3><button class="close" onclick="closeModal('returnModal')">×</button></div>
+  <div class="form-grid">
+    <div class="field" style="grid-column:1/-1"><label>الفاتورة الأصلية</label><select id="returnSale" onchange="updateReturnPreview()"></select></div>
+    <div class="field"><label>الكمية المرتجعة</label><input id="returnQty" type="number" min="1" value="1" oninput="updateReturnPreview()"></div>
+    <div class="field"><label>سبب الإرجاع (اختياري)</label><input id="returnReason" placeholder="مثال: عبوة تالفة"></div>
+  </div>
+  <div class="panel" style="margin-top:15px;margin-bottom:0">
+    <p>المبلغ المسترد: <strong class="red" id="returnTotal">0 ج.م</strong></p>
+    <p>الربح المخصوم: <strong class="gold" id="returnProfit">0 ج.م</strong></p>
+    <p id="returnLeft" style="color:var(--muted);font-size:12px"></p>
+  </div>
+  <div class="form-actions"><button class="btn btn-primary" onclick="saveReturn()">تأكيد المرتجع</button><button class="btn btn-secondary" onclick="closeModal('returnModal')">إلغاء</button></div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ============ إعدادات Supabase ============
+const SUPABASE_URL='https://mcmoxdtmvtiyrfedgjrt.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_ykCIj9Cr9m5QVu5Q7Tn9fA_PBPpMSZ2';
+const CONFIGURED=!SUPABASE_URL.includes('YOUR-PROJECT');
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+
+let data={products:[],sales:[],returns:[],settings:{shopName:'OIL KING',defaultLimit:5}};
+
+// ============ أدوات مساعدة ============
+function money(n){return (Number(n)||0).toLocaleString('ar-EG',{maximumFractionDigits:2})+' ج.م'}
+function todayKey(){return new Date().toLocaleDateString('en-CA')}
+function dayKey(iso){return new Date(iso).toLocaleDateString('en-CA')}
+function dateLabel(d){return new Date(d).toLocaleDateString('ar-EG')}
+function escapeHTML(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function sum(arr,field){return arr.reduce((a,x)=>a+(Number(x[field])||0),0)}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function showError(err){alert('حدث خطأ: '+(err?.message||err))}
+
+function openPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===name));
+  const titles={dashboard:'لوحة التحكم',sales:'المبيعات',returns:'المرتجعات',products:'المنتجات',inventory:'المخزون',reports:'التقارير والإحصائيات',settings:'الإعدادات'};
+  document.getElementById('pageTitle').textContent=titles[name];
+  document.getElementById('sidebar').classList.remove('open');
+  renderAll();
+}
+document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>openPage(b.dataset.page)));
+
+// ============ تحويل صفوف قاعدة البيانات لشكل التطبيق ============
+const fromProduct=r=>({id:r.id,name:r.name,category:r.category,cost:Number(r.cost),price:Number(r.price),stock:r.stock,limit:r.low_limit});
+const fromSale=r=>({id:r.id,invoice:r.invoice,productId:r.product_id,productName:r.product_name,qty:r.qty,
+  price:Number(r.price),cost:Number(r.cost),total:Number(r.total),profit:Number(r.profit),date:r.sold_at});
+const fromReturn=r=>({id:r.id,number:r.return_number,saleId:r.sale_id,productId:r.product_id,productName:r.product_name,
+  qty:r.qty,price:Number(r.price),cost:Number(r.cost),refund:Number(r.refund_total),profit:Number(r.refund_profit),
+  reason:r.reason||'',date:r.returned_at});
+
+// ============ تحميل وتحديث البيانات ============
+async function loadAll(){
+  const [p,s,r,st]=await Promise.all([
+    sb.from('products').select('*').order('name'),
+    sb.from('sales').select('*').order('sold_at',{ascending:false}),
+    sb.from('sales_returns').select('*').order('returned_at',{ascending:false}),
+    sb.from('settings').select('*').eq('id',1).maybeSingle()
+  ]);
+  const failed=[p,s,r,st].find(x=>x.error);
+  if(failed) throw failed.error;
+
+  data.products=p.data.map(fromProduct);
+  data.sales=s.data.map(fromSale);
+  data.returns=r.data.map(fromReturn);
+  if(st.data) data.settings={shopName:st.data.shop_name,defaultLimit:st.data.default_limit};
+
+  document.getElementById('shopName').value=data.settings.shopName;
+  document.getElementById('defaultLimit').value=data.settings.defaultLimit;
+  const badge=document.getElementById('dbStatus');
+  badge.textContent='متصل بقاعدة البيانات';
+  badge.className='tag';
+  renderAll();
+}
+async function refresh(){
+  try{await loadAll()}catch(e){showError(e)}
+}
+
+// ============ تسجيل الدخول ============
+async function login(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPass').value;
+  const {error}=await sb.auth.signInWithPassword({email,password});
+  if(error){alert('بيانات الدخول غير صحيحة.');return}
+  closeModal('loginModal');
+  await refresh();
+}
+async function logout(){
+  await sb.auth.signOut();
+  location.reload();
+}
+
+// ============ المنتجات ============
+function openProduct(productId=null){
+  const p=data.products.find(x=>x.id===productId);
+  document.getElementById('productModalTitle').textContent=p?'تعديل المنتج':'إضافة منتج';
+  document.getElementById('editProductId').value=p?.id||'';
+  document.getElementById('pName').value=p?.name||'';
+  document.getElementById('pCategory').value=p?.category||'زيوت محركات';
+  document.getElementById('pCost').value=p?.cost??'';
+  document.getElementById('pPrice').value=p?.price??'';
+  document.getElementById('pStock').value=p?.stock??'';
+  document.getElementById('pLimit').value=p?.limit??data.settings.defaultLimit;
+  document.getElementById('productModal').classList.add('open');
+}
+async function saveProduct(){
+  const name=document.getElementById('pName').value.trim();
+  const cost=Number(document.getElementById('pCost').value);
+  const price=Number(document.getElementById('pPrice').value);
+  const stock=Number(document.getElementById('pStock').value);
+  const limit=Number(document.getElementById('pLimit').value);
+  if(!name||document.getElementById('pCost').value===''||document.getElementById('pPrice').value===''||
+     document.getElementById('pStock').value===''||cost<0||price<0||stock<0||limit<0){
+    alert('راجع البيانات المدخلة.');return;
+  }
+  const row={name,category:document.getElementById('pCategory').value,cost,price,stock,low_limit:limit,
+    updated_at:new Date().toISOString()};
+  const editId=document.getElementById('editProductId').value;
+  const res=editId
+    ? await sb.from('products').update(row).eq('id',editId)
+    : await sb.from('products').insert(row);
+  if(res.error) return showError(res.error);
+  closeModal('productModal');
+  await refresh();
+}
+async function deleteProduct(productId){
+  if(data.sales.some(s=>s.productId===productId)){
+    alert('لا يمكن حذف منتج له مبيعات مسجلة. يمكنك تعديل بياناته بدلًا من ذلك.');return;
+  }
+  if(!confirm('هل تريد حذف هذا المنتج؟'))return;
+  const {error}=await sb.from('products').delete().eq('id',productId);
+  if(error) return showError(error);
+  await refresh();
+}
+function renderProducts(){
+  const q=(document.getElementById('productSearch')?.value||'').toLowerCase();
+  const rows=data.products.filter(p=>p.name.toLowerCase().includes(q)).map(p=>`
+  <tr><td><strong>${escapeHTML(p.name)}</strong></td><td>${escapeHTML(p.category)}</td>
+  <td>${money(p.cost)}</td><td>${money(p.price)}</td><td>${p.stock}</td>
+  <td class="green">${money(p.price-p.cost)}</td>
+  <td><div class="actions"><button class="btn btn-secondary" onclick="openProduct('${p.id}')">تعديل</button>
+  <button class="btn btn-danger" onclick="deleteProduct('${p.id}')">حذف</button></div></td></tr>`).join('');
+  document.getElementById('productsTable').innerHTML=rows||'<tr><td colspan="7" class="empty">لا توجد منتجات حتى الآن</td></tr>';
+}
+
+// ============ المبيعات ============
+function returnedQty(saleId){return data.returns.filter(r=>r.saleId===saleId).reduce((a,r)=>a+r.qty,0)}
+function remaining(saleId){
+  const s=data.sales.find(x=>x.id===saleId);
+  return s?s.qty-returnedQty(saleId):0;
+}
+function openSale(){
+  if(!data.products.length){alert('أضف منتجات أولًا.');return}
+  document.getElementById('saleProduct').innerHTML=data.products.map(p=>
+    `<option value="${p.id}" ${p.stock===0?'disabled':''}>${escapeHTML(p.name)} — المتاح ${p.stock}</option>`).join('');
+  document.getElementById('saleQty').value=1;
+  updateSalePreview();
+  document.getElementById('saleModal').classList.add('open');
+}
+function updateSalePreview(){
+  const p=data.products.find(x=>x.id===document.getElementById('saleProduct').value);
+  if(!p)return;
+  if(document.activeElement?.id!=='salePrice') document.getElementById('salePrice').value=p.price;
+  const qty=Number(document.getElementById('saleQty').value)||0;
+  const price=Number(document.getElementById('salePrice').value)||0;
+  document.getElementById('saleTotal').textContent=money(qty*price);
+  document.getElementById('saleProfit').textContent=money(qty*(price-p.cost));
+  document.getElementById('saleStock').textContent='المتاح بالمخزون: '+p.stock+' وحدة';
+}
+async function saveSale(){
+  const productId=document.getElementById('saleProduct').value;
+  const product=data.products.find(p=>p.id===productId);
+  const qty=Number(document.getElementById('saleQty').value);
+  const price=Number(document.getElementById('salePrice').value);
+  if(!product||!Number.isInteger(qty)||qty<=0||!Number.isFinite(price)||price<0){alert('راجع بيانات البيع.');return}
+  if(qty>product.stock){alert('الكمية المطلوبة أكبر من المتاح بالمخزون.');return}
+  const {error}=await sb.rpc('record_sale',{p_product_id:productId,p_qty:qty,p_price:price});
+  if(error) return showError(error);
+  closeModal('saleModal');
+  await refresh();
+  alert('تم تسجيل البيع وخصم الكمية من المخزون بنجاح.');
+}
+function renderSales(){
+  const rows=data.sales.map(s=>`<tr><td>${s.invoice}</td><td>${escapeHTML(s.productName)}</td>
+  <td>${s.qty}</td><td class="red">${returnedQty(s.id)||'—'}</td><td>${money(s.price)}</td><td>${money(s.total)}</td>
+  <td class="green">${money(s.profit)}</td><td>${dateLabel(s.date)}</td></tr>`).join('');
+  document.getElementById('salesTable').innerHTML=rows||'<tr><td colspan="8" class="empty">لا توجد مبيعات مسجلة</td></tr>';
+}
+
+// ============ المرتجعات ============
+function openReturn(){
+  const options=data.sales.filter(s=>remaining(s.id)>0);
+  if(!options.length){alert('لا توجد فواتير متاحة للإرجاع.');return}
+  document.getElementById('returnSale').innerHTML=options.map(s=>
+    `<option value="${s.id}">${s.invoice} — ${escapeHTML(s.productName)} — المتاح للإرجاع ${remaining(s.id)}</option>`).join('');
+  document.getElementById('returnQty').value=1;
+  document.getElementById('returnReason').value='';
+  updateReturnPreview();
+  document.getElementById('returnModal').classList.add('open');
+}
+function updateReturnPreview(){
+  const sale=data.sales.find(s=>s.id===document.getElementById('returnSale').value);
+  if(!sale)return;
+  const left=remaining(sale.id);
+  const input=document.getElementById('returnQty');
+  input.max=left;
+  const qty=Number(input.value)||0;
+  document.getElementById('returnTotal').textContent=money(qty*sale.price);
+  document.getElementById('returnProfit').textContent=money(qty*(sale.price-sale.cost));
+  document.getElementById('returnLeft').textContent='المتاح للإرجاع من هذه الفاتورة: '+left+' وحدة';
+}
+async function saveReturn(){
+  const saleId=document.getElementById('returnSale').value;
+  const qty=Number(document.getElementById('returnQty').value);
+  const reason=document.getElementById('returnReason').value.trim();
+  const sale=data.sales.find(s=>s.id===saleId);
+  if(!sale||!Number.isInteger(qty)||qty<=0){alert('راجع بيانات المرتجع.');return}
+  if(qty>remaining(saleId)){alert('الكمية المرتجعة أكبر من المتاح للإرجاع من هذه الفاتورة.');return}
+  const {error}=await sb.rpc('record_sales_return',{p_sale_id:saleId,p_qty:qty,p_reason:reason});
+  if(error) return showError(error);
+  closeModal('returnModal');
+  await refresh();
+  alert('تم تسجيل المرتجع وإعادة الكمية للمخزون.');
+}
+function renderReturns(){
+  document.getElementById('retCount').textContent=data.returns.length;
+  document.getElementById('retTotal').textContent=money(sum(data.returns,'refund'));
+  document.getElementById('retUnits').textContent=sum(data.returns,'qty');
+  document.getElementById('returnsTable').innerHTML=data.returns.map(r=>{
+    const s=data.sales.find(x=>x.id===r.saleId);
+    return `<tr><td>${r.number}</td><td>${s?s.invoice:'—'}</td><td>${escapeHTML(r.productName)}</td>
+    <td>${r.qty}</td><td class="red">${money(r.refund)}</td><td class="gold">${money(r.profit)}</td>
+    <td>${escapeHTML(r.reason)||'—'}</td><td>${dateLabel(r.date)}</td></tr>`;
+  }).join('')||'<tr><td colspan="8" class="empty">لا توجد مرتجعات مسجلة</td></tr>';
+}
+
+// ============ المخزون ============
+function renderInventory(){
+  const low=data.products.filter(p=>p.stock>0&&p.stock<=p.limit).length;
+  const out=data.products.filter(p=>p.stock===0).length;
+  document.getElementById('stockUnits').textContent=sum(data.products,'stock');
+  document.getElementById('stockValue').textContent=money(data.products.reduce((a,p)=>a+p.stock*p.cost,0));
+  document.getElementById('lowCount').textContent=low;
+  document.getElementById('outCount').textContent=out;
+  document.getElementById('inventoryTable').innerHTML=data.products.map(p=>{
+    const status=p.stock===0?'<span class="tag out">نفد</span>':p.stock<=p.limit?'<span class="tag low">منخفض</span>':'<span class="tag">متوفر</span>';
+    return `<tr><td>${escapeHTML(p.name)}</td><td>${p.stock}</td><td>${p.limit}</td><td>${status}</td><td>${money(p.stock*p.cost)}</td></tr>`;
+  }).join('')||'<tr><td colspan="5" class="empty">لا توجد منتجات</td></tr>';
+}
+
+// ============ لوحة التحكم ============
+function renderDashboard(){
+  const t=todayKey();
+  const sales=data.sales.filter(s=>dayKey(s.date)===t);
+  const rets=data.returns.filter(r=>dayKey(r.date)===t);
+  document.getElementById('todaySales').textContent=money(sum(sales,'total')-sum(rets,'refund'));
+  document.getElementById('todayProfit').textContent=money(sum(sales,'profit')-sum(rets,'profit'));
+  document.getElementById('todayInvoices').textContent=sales.length;
+  document.getElementById('todayReturns').textContent='مرتجعات اليوم: '+rets.length;
+  document.getElementById('productCount').textContent=data.products.length;
+
+  document.getElementById('recentSales').innerHTML=data.sales.slice(0,6).map(s=>
+    `<tr><td>${s.invoice}</td><td>${escapeHTML(s.productName)}</td><td>${s.qty}</td><td>${money(s.total)}</td>
+    <td class="green">${money(s.profit)}</td><td>${dateLabel(s.date)}</td></tr>`).join('')
+    ||'<tr><td colspan="6" class="empty">لا توجد مبيعات حتى الآن</td></tr>';
+
+  const grouped={};
+  const add=(pid,name,qty,total)=>{
+    grouped[pid]=grouped[pid]||{name,qty:0,total:0};
+    grouped[pid].qty+=qty;grouped[pid].total+=total;
+  };
+  data.sales.forEach(s=>add(s.productId,s.productName,s.qty,s.total));
+  data.returns.forEach(r=>add(r.productId,r.productName,-r.qty,-r.refund));
+  const top=Object.values(grouped).filter(p=>p.qty>0).sort((a,b)=>b.qty-a.qty).slice(0,5);
+  document.getElementById('topProducts').innerHTML=top.map(p=>
+    `<tr><td>${escapeHTML(p.name)}</td><td>${p.qty}</td><td>${money(p.total)}</td></tr>`).join('')
+    ||'<tr><td colspan="3" class="empty">ستظهر المنتجات هنا بعد تسجيل المبيعات</td></tr>';
+
+  const alerts=data.products.filter(p=>p.stock<=p.limit);
+  document.getElementById('dashboardAlerts').innerHTML=alerts.length
+    ?`<div class="alert">⚠ تنبيه المخزون: ${alerts.map(p=>escapeHTML(p.name)+' ('+p.stock+')').join('، ')}</div>`:'';
+}
+
+// ============ التقارير ============
+function renderReports(){
+  const gross=sum(data.sales,'total');
+  const refunds=sum(data.returns,'refund');
+  const netRevenue=gross-refunds;
+  const netCost=sum(data.sales.map(s=>({v:s.cost*s.qty})),'v')-sum(data.returns.map(r=>({v:r.cost*r.qty})),'v');
+  const netProfit=sum(data.sales,'profit')-sum(data.returns,'profit');
+
+  document.getElementById('reportSales').textContent=money(netRevenue);
+  document.getElementById('reportReturns').textContent=money(refunds);
+  document.getElementById('reportCost').textContent=money(netCost);
+  document.getElementById('reportProfit').textContent=money(netProfit);
+  document.getElementById('allSales').textContent=money(gross);
+  document.getElementById('allProfit').textContent=money(sum(data.sales,'profit'));
+  document.getElementById('salesCount').textContent=data.sales.length;
+  document.getElementById('returnsCount').textContent=data.returns.length;
+  document.getElementById('avgInvoice').textContent=money(data.sales.length?gross/data.sales.length:0);
+  document.getElementById('avgProfit').textContent=money(data.sales.length?netProfit/data.sales.length:0);
+
+  const days=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const key=d.toLocaleDateString('en-CA');
+    const value=sum(data.sales.filter(s=>dayKey(s.date)===key),'total')-sum(data.returns.filter(r=>dayKey(r.date)===key),'refund');
+    days.push({label:d.toLocaleDateString('ar-EG',{weekday:'short'}),value});
+  }
+  const max=Math.max(1,...days.map(d=>d.value));
+  document.getElementById('salesChart').innerHTML=days.map(d=>
+    `<div class="bar-item"><div class="bar" style="height:${Math.max(4,d.value/max*135)}px"></div>${d.label}<br>${d.value.toLocaleString('ar-EG')}</div>`).join('');
+}
+
+function renderAll(){
+  renderProducts();renderSales();renderReturns();renderInventory();renderDashboard();renderReports();
+}
+
+// ============ الإعدادات والنسخ الاحتياطي ============
+async function saveSettings(){
+  const shopName=document.getElementById('shopName').value.trim()||'OIL KING';
+  const defaultLimit=Number(document.getElementById('defaultLimit').value)||0;
+  const {error}=await sb.from('settings').upsert({id:1,shop_name:shopName,default_limit:defaultLimit});
+  if(error) return showError(error);
+  await refresh();
+  alert('تم حفظ الإعدادات.');
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),...data},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='OIL-KING-backup-'+todayKey()+'.json';a.click();URL.revokeObjectURL(a.href);
+}
+
+// ============ التشغيل ============
+document.getElementById('today').textContent=new Date().toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+renderAll();
+
+(async()=>{
+  if(!CONFIGURED){
+    alert('أضف SUPABASE_URL و SUPABASE_ANON_KEY في أول السكربت أولًا.');
+    return;
+  }
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){document.getElementById('loginModal').classList.add('open');return}
+  await refresh();
+})();
+</script>
+</body>
+</html>
